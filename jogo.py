@@ -9,13 +9,46 @@ class Jogo:
         self.genero = genero
         self.publisher = publisher
         self.developer = developer
-        self.critic_score = float(critic_score)
-        self.total_sales = float(total_sales)
-        self.na_sales = float(na_sales)
-        self.jp_sales = float(jp_sales)
-        self.pal_sales = float(pal_sales)
-        self.other_sales = float(other_sales)
+
+        # tratamento simples (nível júnior)
+        try:
+            self.critic_score = float(critic_score)
+        except:
+            self.critic_score = 0.0
+
+        try:
+            self.total_sales = float(total_sales)
+        except:
+            self.total_sales = 0.0
+
+        try:
+            self.na_sales = float(na_sales)
+        except:
+            self.na_sales = 0.0
+
+        try:
+            self.jp_sales = float(jp_sales)
+        except:
+            self.jp_sales = 0.0
+
+        try:
+            self.pal_sales = float(pal_sales)
+        except:
+            self.pal_sales = 0.0
+
+        try:
+            self.other_sales = float(other_sales)
+        except:
+            self.other_sales = 0.0
+
         self.release_date = release_date
 
+    # 🔥 AQUI ESTÁ A CORREÇÃO PRINCIPAL
     def exibir(self):
-        return f"{self.id} - {self.titulo} ({self.console}) | Nota: {self.critic_score}"
+        return (
+            f"{self.id} - {self.titulo} | "
+            f"Gênero: {self.genero} | "
+            f"Console: {self.console} | "
+            f"Nota: {self.critic_score} | "
+            f"Vendas: {self.total_sales}"
+        )
