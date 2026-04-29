@@ -1,118 +1,122 @@
-import csv
-from jogo import Jogo
-from filabacklog import FilaBacklog
-from pilharecentes import PilhaRecentes
-from sessao import SessaoJogo
+def analisar_proximos(self):
+    print("\n--- PRÓXIMOS JOGOS (BACKLOG) ---")
+    self.backlog.mostrar()
 
 
-def to_float(valor):
-    try:
-        return float(valor)
-    except:
-        return 0.0
+def analisar_recentes(self):
+    print("\n--- JOGOS RECENTES ---")
+    self.recentes.mostrar()
 
 
-class SteamPy:
-    def __init__(self):
-        self.catalogo = []
-        self.backlog = FilaBacklog()
-        self.recentes = PilhaRecentes()
-        self.historico = []
-        self.tempos = {}
+def jogo_mais_jogado(self):
+    if not self.tempos:
+        print("Nenhum jogo jogado ainda")
+        return
 
-    def carregar_jogos(self, arquivo):
-        with open(arquivo, encoding="utf-8") as f:
-            leitor = csv.reader(f)
-            next(leitor)
+    jogo_id = max(self.tempos, key=self.tempos.get)
+    jogo = self.catalogo[jogo_id]
 
-            for i, linha in enumerate(leitor):
-                try:
-                    jogo = Jogo(
-                        i,
-                        linha[1],
-                        linha[2],
-                        linha[3],
-                        linha[4],
-                        linha[5],
-                        to_float(linha[6]),
-                        to_float(linha[7]),
-                        to_float(linha[8]),
-                        to_float(linha[9]),
-                        to_float(linha[10]),
-                        to_float(linha[11]),
-                        linha[12]
-                    )
-                    self.catalogo.append(jogo)
-                except:
-                    continue
+    print("\nJogo mais jogado:")
+    print(jogo.exibir(), "- Horas:", self.tempos[jogo_id])
 
-        print("Catálogo carregado!")
 
-    def listar(self):
-        for jogo in self.catalogo[:20]:
+def genero_favorito(self):
+    contagem = {}
+
+    for s in self.historico:
+        g = s.jogo.genero
+        contagem[g] = contagem.get(g, 0) + 1
+
+    if not contagem:
+        print("Sem dados ainda")
+        return
+
+    favorito = max(contagem, key=contagem.get)
+    print("\nGênero favorito:", favorito)
+
+
+def console_favorito(self):
+    contagem = {}
+
+    for s in self.historico:
+        c = s.jogo.console
+        contagem[c] = contagem.get(c, 0) + 1
+
+    if not contagem:
+        print("Sem dados ainda")
+        return
+
+    favorito = max(contagem, key=contagem.get)
+    print("\nConsole mais jogado:", favorito)
+
+
+def jogos_em_andamento(self):
+    count = 0
+
+    for tempo in self.tempos.values():
+        if 2 <= tempo < 20:
+            count += 1
+
+    print("\nJogos em andamento:", count)
+
+
+def media_notas(self):
+    notas = []
+
+    for s in self.historico:
+        notas.append(s.jogo.critic_score)
+
+    if not notas:
+        print("Sem dados ainda")
+        return
+
+    media = sum(notas) / len(notas)
+    print("\nNota média dos jogos jogados:", round(media, 2))
+
+
+def panorama(self):
+    print("\n--- PANORAMA GERAL ---")
+
+    print("Total de jogos:", len(self.catalogo))
+    print("Backlog:", self.backlog.tamanho())
+    print("Recentes:", self.recentes.tamanho())
+    print("Sessões:", len(self.historico))
+    print("Tempo total:", sum(self.tempos.values()))
+
+    self.genero_favorito()
+    self.console_favorito()
+
+
+def recomendacao_avancada(self):
+    print("\n--- RECOMENDAÇÃO INTELIGENTE ---")
+
+    generos = {}
+    consoles = {}
+
+    for s in self.historico:
+        g = s.jogo.genero
+        c = s.jogo.console
+
+        generos[g] = generos.get(g, 0) + 1
+        consoles[c] = consoles.get(c, 0) + 1
+
+    if not generos:
+        print("Sem dados suficientes")
+        return
+
+    genero_pref = max(generos, key=generos.get)
+    console_pref = max(consoles, key=consoles.get)
+
+    print("Baseado em:")
+    print("- Gênero:", genero_pref)
+    print("- Console:", console_pref)
+
+    for jogo in self.catalogo:
+        if (
+            jogo.genero == genero_pref
+            and jogo.console == console_pref
+            and jogo.id not in self.tempos
+        ):
+            print("\nSugestão:")
             print(jogo.exibir())
-
-    def buscar(self, nome):
-        for jogo in self.catalogo:
-            if nome.lower() in jogo.titulo.lower():
-                print(jogo.exibir())
-
-    def adicionar_backlog(self, id_jogo):
-        if id_jogo < len(self.catalogo):
-            jogo = self.catalogo[id_jogo]
-            self.backlog.enqueue(jogo)
-            print("Adicionado ao backlog!")
-        else:
-            print("ID inválido")
-
-    def jogar_proximo(self):
-        jogo = self.backlog.dequeue()
-        if jogo:
-            print("Jogando:", jogo.titulo)
-            self.recentes.push(jogo)
-            return jogo
-        else:
-            print("Backlog vazio")
-            return None
-
-    def registrar_tempo(self, jogo, tempo):
-        total = self.tempos.get(jogo.id, 0) + tempo
-        self.tempos[jogo.id] = total
-
-        sessao = SessaoJogo(jogo, tempo, total)
-        self.historico.append(sessao)
-
-        with open("historico_jogo.txt", "a", encoding="utf-8") as f:
-            f.write(sessao.linha() + "\n")
-
-        print("Sessão registrada!")
-
-    def dashboard(self):
-        total_tempo = sum(self.tempos.values())
-
-        print("\n--- DASHBOARD ---")
-        print("Total jogos no catálogo:", len(self.catalogo))
-        print("Jogos no backlog:", self.backlog.tamanho())
-        print("Jogos recentes:", self.recentes.tamanho())
-        print("Sessões jogadas:", len(self.historico))
-        print("Tempo total jogado:", total_tempo)
-
-    def recomendar(self):
-        print("\n--- RECOMENDAÇÃO ---")
-
-        generos = {}
-        for s in self.historico:
-            g = s.jogo.genero
-            generos[g] = generos.get(g, 0) + 1
-
-        if not generos:
-            print("Sem dados ainda")
-            return
-
-        favorito = max(generos, key=generos.get)
-
-        for jogo in self.catalogo:
-            if jogo.genero == favorito and jogo.id not in self.tempos:
-                print("Baseado no seu gênero favorito:", favorito)
-                print(jogo.exibir())
-                break
+            break
