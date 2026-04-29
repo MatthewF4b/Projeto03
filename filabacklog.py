@@ -9,19 +9,18 @@ class FilaBacklog:
         if self.is_empty():
             return None
         return self.dados.pop(0)
-    
+
     def is_empty(self):
         return len(self.dados) == 0
-    
+
     def mostrar(self):
         if self.is_empty():
-            print('Backlog vazio')
+            print("Backlog vazio")
             return
-        
-        print('----- BACKLOG -----')
-        for index, jogo in enumerate(self.dados, start = 1):
-            print(f'{index} - {jogo.exibir()}')
-    
+
+        print("\n--- BACKLOG ---")
+        for i, jogo in enumerate(self.dados, 1):
+            print(f"{i} - {jogo.exibir()}")
+
     def tamanho(self):
         return len(self.dados)
-
